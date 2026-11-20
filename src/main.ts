@@ -5,6 +5,7 @@ import type { Dataset, Vec2 } from './model';
 import { clamp, computeS, H, L1, L2, modelActivate, solveIKPure } from './model';
 import { runEvals } from './evals';
 import { createMuscles, updateMuscles } from './muscles';
+import { createBP3DMuscles, updateBP3DMuscles, BP3DMuscles } from './musclesBP3D';
 
 const dataset = datasetJson as unknown as Dataset;
 const ex = dataset.ejercicios['press-banca'];
@@ -90,8 +91,17 @@ const upper = makeSeg(boneMat), fore = makeSeg(boneMat);
 const shoulderBall = makeBall(jointMat, 0.055), elbowBall = makeBall(jointMat, 0.048);
 const handBall = makeBall(jointMat, 0.042);
 
-// écorché procedural (N2): volúmenes musculares con silueta anatómica
+// écorché: mallas reales de BodyParts3D si cargan; procedural como fallback offline
 const muscles = createMuscles(scene);
+let bp3d: BP3DMuscles | null = null;
+createBP3DMuscles(scene, import.meta.env.BASE_URL + 'models/bp3d/')
+  .then((m) => {
+    bp3d = m;
+    muscles.pec.visible = false; muscles.delt.visible = false;
+    muscles.triLat.visible = false; muscles.triLong.visible = false; muscles.bi.visible = false;
+    ($('badge') as HTMLElement).textContent = 'écorché BodyParts3D · CC-BY-SA';
+  })
+  .catch((e) => console.warn('BodyParts3D no disponible; écorché procedural', e));
 
 const upperF = makeSeg(boneMatF), foreF = makeSeg(boneMatF);
 const elbowF = makeBall(jointMatF, 0.042), handF = makeBall(jointMatF, 0.036);
@@ -278,9 +288,10 @@ function draw(dt: number): void {
   // única fuente de verdad: la escena usa el mismo modelo puro que los evals/tests
   const act = modelActivate(ex, { weight, thetaDeg, grip, S, T, E });
   const flexNorm = act.info.flexNorm;
-
   // écorché procedural: posiciona, crece y colorea los músculos según la activación
-  updateMuscles(muscles, S, E, T, thetaDeg, act);
+  // écorché: BodyParts3D si cargó, procedural si no
+  if (bp3d) updateBP3DMuscles(bp3d, S, E, T, thetaDeg, act);
+  else updateMuscles(muscles, S, E, T, thetaDeg, act);
 
   dbGroup.position.copy(Tp);
   const pr = 0.10 + weight / 120 * 0.06;

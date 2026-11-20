@@ -10,7 +10,7 @@ const UPV = new THREE.Vector3(0, 1, 0);
 const H2 = new THREE.Vector2(-0.80, 0.30);
 const cTmp = new THREE.Color(), hTmp = new THREE.Color();
 
-function paint(mat: THREE.MeshStandardMaterial, hue: number, act: number): void {
+export function paint(mat: THREE.MeshStandardMaterial, hue: number, act: number): void {
   mat.color.copy(cTmp.set(BASE).lerp(hTmp.set(hue), act));
   mat.emissive.set(hue).multiplyScalar(0.30 * act);
 }
