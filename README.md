@@ -88,9 +88,11 @@ Corto plazo:
 
 Medio plazo — Nivel 2 (visual):
 
-- [ ] Écorché: sustituir las cápsulas por mallas musculares reales (estampadas entre puntos
-  de origen e inserción, siguiendo la IK). **Regla del proyecto: primero licencia, después código.**
-  Candidatas: BodyParts3D (CC-BY-SA 2.1 JP), Z-Anatomy (CC-BY-SA).
+- [x] Investigación de licencias: BodyParts3D (CC-BY-SA 2.1 JP) elegido como fuente de
+  mallas anatómicas reales; la licencia y el crédito quedan documentados en `CREDITS.md`.
+- [ ] Écorché con mallas reales: integrar pecoral mayor, deltoides, tríceps y bíceps de
+  BodyParts3D como estampas anatómicas orientadas por los puntos de la IK
+  (manteniendo el écorché procedural como alternativa de dominio puro).
 
 Más adelante:
 
@@ -120,16 +122,11 @@ pnpm preview  # sirve el build
 
 ## Licencia y créditos
 
-- **Código y documentación: Unlicense (dominio público).** Cualquiera puede copiar,
-  modificar, publicar, vender o distribuir este software, con o sin atribución, para
-  cualquier propósito. Ver el archivo `LICENSE`.
-- **Datos propios del dataset (valores digitalizados y estructura): CC0 1.0** — también
-  dominio público (texto completo: creativecommons.org/publicdomain/zero/1.0/legalcode).
-- **Nota de integridad científica:** las fuentes de los estudios (Rodríguez-Ridao 2020,
+- **Código y documentación: Unlicense (dominio público)** — copiar, modificar, publicar,
+  vender o distribuir, con o sin atribución, para cualquier propósito. Ver `LICENSE`.
+- **Datos propios del dataset: CC0 1.0** (dominio público).
+- **Mallas anatómicas de BodyParts3D: CC-BY-SA 2.1 Japón** — si se redistribuyen,
+  hay que acreditar a DBCLS (ver `CREDITS.md`). El resto del proyecto no se ve afectado.
+- Nota de integridad científica: las fuentes de los estudios (Rodríguez-Ridao 2020,
   An et al. 1981, Barnett 1995) se mantienen citadas en el dataset no por exigencia legal
-  sino por honestidad: cada número sigue llevando su estudio. El artículo original
-  (Rodríguez-Ridao 2020, MDPI) es CC-BY 4.0: los valores que de él se digitalizaron se
-  liberan aquí como datos sin derechos propios, pero la cita al original se conserva.
-- Los activos de terceros que se incorporen en el futuro (p. ej. mallas del écorché)
-  deberán ser de dominio público (CC0) o libres compatibles, y se acreditarán en
-  `CREDITS.md`.
+  sino por honestidad: cada número sigue llevando su estudio.

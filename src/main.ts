@@ -4,6 +4,7 @@ import datasetJson from '../data/exercises/bench-press.json';
 import type { Dataset, Vec2 } from './model';
 import { clamp, computeS, H, L1, L2, modelActivate, solveIKPure } from './model';
 import { runEvals } from './evals';
+import { createMuscles, updateMuscles } from './muscles';
 
 const dataset = datasetJson as unknown as Dataset;
 const ex = dataset.ejercicios['press-banca'];
@@ -65,10 +66,6 @@ const skinMat  = new THREE.MeshStandardMaterial({ color: 0xc4a084, roughness: .8
 const benchMat = new THREE.MeshStandardMaterial({ color: 0x33383f, roughness: .9 });
 const legMat   = new THREE.MeshStandardMaterial({ color: 0x272b31, roughness: .9 });
 const floorMat = new THREE.MeshStandardMaterial({ color: 0x1d2025, roughness: 1 });
-const pecMat   = new THREE.MeshStandardMaterial({ color: 0x6a7078, roughness: .75 });
-const delMat   = new THREE.MeshStandardMaterial({ color: 0x6a7078, roughness: .75 });
-const triMat   = new THREE.MeshStandardMaterial({ color: 0x6a7078, roughness: .75 });
-const biMat    = new THREE.MeshStandardMaterial({ color: 0x6a7078, roughness: .75 });
 const loadMat  = new THREE.MeshStandardMaterial({ color: 0x555b64, roughness: .4, metalness: .7 });
 const HUES = { p: 0xe2574c, d: 0xd8a24a, t: 0x4c9de2, b: 0x8a6fd8 } as const;
 
@@ -92,10 +89,9 @@ scene.add(hips, chest, head, thigh, calf);
 const upper = makeSeg(boneMat), fore = makeSeg(boneMat);
 const shoulderBall = makeBall(jointMat, 0.055), elbowBall = makeBall(jointMat, 0.048);
 const handBall = makeBall(jointMat, 0.042);
-const pec = makeSeg(pecMat, 14);
-const delt = makeBall(delMat, 0.06);
-const triceps = makeSeg(triMat, 14);
-const biceps = makeSeg(biMat, 14);
+
+// écorché procedural (N2): volúmenes musculares con silueta anatómica
+const muscles = createMuscles(scene);
 
 const upperF = makeSeg(boneMatF), foreF = makeSeg(boneMatF);
 const elbowF = makeBall(jointMatF, 0.042), handF = makeBall(jointMatF, 0.036);
@@ -151,13 +147,6 @@ function updateBench(): void {
 updateBench();
 
 function solveIK(): { E: Vec2; T: Vec2 } { return solveIKPure(S, target); }
-
-function setMuscle(mesh: THREE.Mesh, mat: THREE.MeshStandardMaterial, a: THREE.Vector3, b: THREE.Vector3, baseR: number, act: number, hueKey: keyof typeof HUES): void {
-  const r = baseR + baseR * 0.85 * act;
-  setSeg(mesh, a, b, r);
-  mat.color.set(0x6a7078).lerp(new THREE.Color(HUES[hueKey]), clamp(act, 0, 1));
-  mat.emissive.set(HUES[hueKey]).multiplyScalar(act * 0.30);
-}
 
 // ---------- gráfica ----------
 const chart = $('chart') as HTMLCanvasElement;
@@ -255,10 +244,6 @@ function showEvals(): void {
 
 // ---------- bucle ----------
 function draw(dt: number): void {
-  const t = (thetaDeg * Math.PI) / 180;
-  const u = new THREE.Vector2(Math.cos(t), Math.sin(t));
-  const n = new THREE.Vector2(-Math.sin(t), Math.cos(t));
-
   if (autoRep) {
     repPhase = (repPhase + dt / repSecs) % 1;
     const f = 0.5 + 0.5 * Math.cos(2 * Math.PI * repPhase);   // 1 arriba … 0 abajo … 1 arriba
@@ -276,7 +261,6 @@ function draw(dt: number): void {
   shoulderBall.position.copy(Sp);
   elbowBall.position.copy(Ep);
   handBall.position.copy(Tp);
-  delt.position.set(Sp.x + n.x * 0.03, Sp.y + n.y * 0.03 + 0.02, 0.04);
 
   // brazo lejano: mismas articulaciones, detrás de la barra
   setSeg(upperF, v3(S, -0.17), v3(E, -0.17), 0.052);
@@ -295,20 +279,8 @@ function draw(dt: number): void {
   const act = modelActivate(ex, { weight, thetaDeg, grip, S, T, E });
   const flexNorm = act.info.flexNorm;
 
-  const dirET = new THREE.Vector3().subVectors(Tp, Ep).normalize();
-  const pecA = new THREE.Vector3(HV.x + u.x * 0.72 + n.x * 0.02, HV.y + u.y * 0.72 + n.y * 0.02 + 0.05, 0.02);
-  const pecB = Sp.clone().addScaledVector(new THREE.Vector3().subVectors(Ep, Sp).normalize(), 0.2);
-  setMuscle(pec, pecMat, pecA, pecB, 0.028, act.p, 'p');
-
-  delt.scale.setScalar(1 + act.d * 0.55);
-
-  const triA = Sp.clone().add(new THREE.Vector3(uArm.y, -uArm.x, 0).multiplyScalar(0.035));
-  const triB = Ep.clone().addScaledVector(dirET, 0.02);
-  setMuscle(triceps, triMat, triA, triB, 0.034, act.t, 't');
-
-  const biA = Sp.clone().add(new THREE.Vector3(-uArm.y, uArm.x, 0).multiplyScalar(0.025));
-  const biB = Ep.clone().addScaledVector(dirET, 0.08);
-  setMuscle(biceps, biMat, biA, biB, 0.03, act.b, 'b');
+  // écorché procedural: posiciona, crece y colorea los músculos según la activación
+  updateMuscles(muscles, S, E, T, thetaDeg, act);
 
   dbGroup.position.copy(Tp);
   const pr = 0.10 + weight / 120 * 0.06;
