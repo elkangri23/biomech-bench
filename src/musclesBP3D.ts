@@ -62,7 +62,7 @@ export async function createBP3DMuscles(scene: THREE.Scene, urlPrefix: string): 
   };
 }
 
-function place(mesh: THREE.Mesh, a: THREE.Vector3, b: THREE.Vector3, opts: { flat?: THREE.Vector3; zBoost?: number } = {}): void {
+function place(mesh: THREE.Mesh, a: THREE.Vector3, b: THREE.Vector3, opts: { flat?: THREE.Vector3; zBoost?: number; bulge?: number } = {}): void {
   const dir = new THREE.Vector3().subVectors(b, a);
   const len = dir.length() || 1e-4;
   dir.normalize();
@@ -78,7 +78,8 @@ function place(mesh: THREE.Mesh, a: THREE.Vector3, b: THREE.Vector3, opts: { fla
     mesh.quaternion.setFromUnitVectors(YUP, dir);
   }
   const zb = opts.zBoost ?? 1;
-  mesh.scale.set(len, len, len * zb);
+  const bu = 1 + (opts.bulge ?? 0);   // abultamiento al activarse: crece la sección, no el largo
+  mesh.scale.set(len * bu, len, len * zb * bu);
 }
 
 export function updateBP3DMuscles(
@@ -95,9 +96,6 @@ export function updateBP3DMuscles(
   const uArm = new THREE.Vector2(E.x - S.x, E.y - S.y);
   const lUE = uArm.length() || 1;
   uArm.multiplyScalar(1 / lUE);
-  const perpOut = new THREE.Vector2(uArm.y, -uArm.x);   // cara posterior/externa
-  const perpIn = new THREE.Vector2(-uArm.y, uArm.x);    // cara del pecho
-  const dirET = new THREE.Vector3(T.x - E.x, T.y - E.y, 0).normalize();
 
   const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 
@@ -108,46 +106,48 @@ export function updateBP3DMuscles(
   place(M.pecS.mesh,
     V(chestC.x - u.x * 0.32 + n.x * 0.01, chestC.y - u.y * 0.32 + n.y * 0.01, 0.105),
     V(S.x + uArm.x * 0.20, S.y + uArm.y * 0.20, 0.075),
-    { flat: Z_CAM });
+    { flat: Z_CAM, bulge: 0.10 * act.p });
   paint(M.pecS.mat, HUES.p, act.p);
 
   // pectoral clavicular: de la clavícula (parte alta del pecho) a la cresta del húmero
   place(M.pecC.mesh,
     V(chestC.x + u.x * 0.22 + n.x * 0.02, chestC.y + u.y * 0.22 + n.y * 0.02, 0.11),
     V(S.x + uArm.x * 0.08, S.y + uArm.y * 0.08, 0.075),
-    { flat: Z_CAM });
+    { flat: Z_CAM, bulge: 0.10 * act.p });
   paint(M.pecC.mat, HUES.p, act.p);
 
-  // deltoides anterior: capucha sobre el hombro, tercio proximal del húmero
+  // deltoides anterior: capucha centrada sobre el eje del húmero, tercio proximal
   place(M.delt.mesh,
-    V(S.x + uArm.x * 0.06 + perpIn.x * 0.015, S.y + uArm.y * 0.06 + perpIn.y * 0.015, 0.068),
-    V(S.x + uArm.x * 0.36 + perpIn.x * 0.015, S.y + uArm.y * 0.36 + perpIn.y * 0.015, 0.062),
-    { zBoost: 1.15 });
+    V(S.x + uArm.x * 0.06, S.y + uArm.y * 0.06, 0.03),
+    V(S.x + uArm.x * 0.36, S.y + uArm.y * 0.36, 0.028),
+    { zBoost: 1.15, bulge: 0.30 * act.d });
   paint(M.delt.mat, HUES.d, act.d);
 
-  // tríceps: tres cabezas, cara posterior/lateral del húmero
+  // tríceps: tres cabezas centradas en el eje del húmero (abraza el brazo por detrás);
+  // terminan en el codo para no flotar sobre el antebrazo al plegarse
   place(M.triLat.mesh,
-    V(S.x + uArm.x * 0.30 + perpOut.x * 0.045, S.y + uArm.y * 0.30 + perpOut.y * 0.045, 0.012),
-    V(E.x + dirET.x * 0.01 + perpOut.x * 0.03, E.y + dirET.y * 0.01 + perpOut.y * 0.03, 0.008),
-    { zBoost: 1.6 });
+    V(S.x + uArm.x * 0.30, S.y + uArm.y * 0.30, -0.02),
+    V(E.x - uArm.x * 0.04, E.y - uArm.y * 0.04, -0.018),
+    { zBoost: 1.6, bulge: 0.30 * act.t });
   place(M.triLong.mesh,
-    V(S.x + uArm.x * 0.05 + perpOut.x * 0.03, S.y + uArm.y * 0.05 + perpOut.y * 0.03, 0.002),
-    V(E.x + dirET.x * 0.02 + perpOut.x * 0.025, E.y + dirET.y * 0.02 + perpOut.y * 0.025, -0.005),
-    { zBoost: 1.7 });
+    V(S.x + uArm.x * 0.05, S.y + uArm.y * 0.05, -0.024),
+    V(E.x - uArm.x * 0.04, E.y - uArm.y * 0.04, -0.022),
+    { zBoost: 1.7, bulge: 0.30 * act.t });
   place(M.triMed.mesh,
-    V(S.x + uArm.x * 0.44 + perpOut.x * 0.02, S.y + uArm.y * 0.44 + perpOut.y * 0.02, -0.005),
-    V(E.x + dirET.x * 0.02 + perpOut.x * 0.015, E.y + dirET.y * 0.02 + perpOut.y * 0.015, -0.008),
-    { zBoost: 2.0 });
+    V(S.x + uArm.x * 0.44, S.y + uArm.y * 0.44, -0.03),
+    V(E.x - uArm.x * 0.04, E.y - uArm.y * 0.04, -0.028),
+    { zBoost: 2.0, bulge: 0.30 * act.t });
   paint(M.triMat, HUES.t, act.t);
 
-  // bíceps: dos cabezas, cara anterior (del pecho)
+  // bíceps: dos cabezas centradas en el eje del húmero, cara anterior (+z hacia cámara);
+  // terminan en el codo, el vientre no cruza la articulación
   place(M.biLong.mesh,
-    V(S.x + uArm.x * 0.03, S.y + uArm.y * 0.03, 0.075),
-    V(E.x + dirET.x * 0.14, E.y + dirET.y * 0.14, 0.07),
-    { zBoost: 1.9 });
+    V(S.x + uArm.x * 0.04, S.y + uArm.y * 0.04, 0.03),
+    V(E.x - uArm.x * 0.03, E.y - uArm.y * 0.03, 0.028),
+    { zBoost: 1.9, bulge: 0.35 * act.b });
   place(M.biShort.mesh,
-    V(S.x + uArm.x * 0.09 + perpIn.x * 0.015, S.y + uArm.y * 0.09 + perpIn.y * 0.015, 0.08),
-    V(E.x + dirET.x * 0.12 + perpIn.x * 0.01, E.y + dirET.y * 0.12 + perpIn.y * 0.01, 0.072),
-    { zBoost: 2.0 });
+    V(S.x + uArm.x * 0.10, S.y + uArm.y * 0.10, 0.034),
+    V(E.x - uArm.x * 0.03, E.y - uArm.y * 0.03, 0.032),
+    { zBoost: 2.0, bulge: 0.35 * act.b });
   paint(M.biMat, HUES.b, act.b);
 }
