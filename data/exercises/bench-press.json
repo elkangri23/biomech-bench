@@ -1,0 +1,232 @@
+{
+  "version": "0.3.0",
+  "status": "EMG VERIFICADO — %MVIC real de Rodríguez-Ridao et al. 2020 (Figura 3); brazos de momento del codo ORIENTATIVO (forma según An et al. 1981, tabla exacta pendiente)",
+  "unidades": {
+    "emg": "%MVIC (contracción isométrica voluntaria máxima)",
+    "brazos_momento": "cm",
+    "angulos": "grados"
+  },
+  "protocolo": "Rodríguez-Ridao et al. 2020: 30 sujetos entrenados, press libre al 60% 1RM, EMG superficial normalizado a MVIC, 5 inclinaciones (0/15/30/45/60°)",
+  "ejercicios": {
+    "press-banca": {
+      "emg_inclinacion": {
+        "descripcion": "%MVIC por inclinación del banco (0° = plano). esternal = PMMP (porción media), clavicular = PMUP (superior) del estudio",
+        "filas_angulos": [
+          0,
+          15,
+          30,
+          45,
+          60
+        ],
+        "musculos": {
+          "pectoral-esternal": [
+            28,
+            24.8,
+            16.6,
+            11.5,
+            6.2
+          ],
+          "pectoral-clavicular": [
+            26.5,
+            28,
+            30,
+            25.2,
+            18.5
+          ],
+          "deltoides-anterior": [
+            26.3,
+            31,
+            33,
+            34,
+            33.3
+          ],
+          "triceps-braquial": [
+            14.6,
+            13.7,
+            13.7,
+            13.8,
+            14.2
+          ],
+          "biceps-braquial": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "fuentes": [
+          "VERIFICADO — Rodríguez-Ridao D, Meana-Esteban A, Martín-Castellanos A, et al. (2020): 'Effect of Five Bench Inclinations on the Electromyographic Activity of the Pectoralis Major, Anterior Deltoid, and Triceps Brachii during the Bench Press Exercise', Int J Environ Res Public Health 17(19):7339, doi:10.3390/ijerph17197339 (open access, mdpi.com/1660-4601/17/19/7339)",
+          "valores digitalizados de la Figura 3 del estudio (aprox. ±0.5% MVIC)",
+          "apoyo cualitativo — Barnett C, Kippers V, Turner P (1995): J Strength Cond Res 9(4):222-227: cabeza clavicular más activa con agarre estrecho; cabeza larga del tríceps más activa en plano/declive y con agarre estrecho",
+          "biceps-braquial: no medido en el estudio; el modelo tampoco lo usa (el bíceps se modela por flexión profunda del codo + brazo de momento)"
+        ]
+      },
+      "brazos_momento_codo": {
+        "descripcion": "brazo de momento (cm) según ángulo interior del codo",
+        "filas_angulos": [
+          0,
+          30,
+          60,
+          90,
+          120,
+          150
+        ],
+        "musculos": {
+          "triceps-braquial": [
+            2.0,
+            2.4,
+            2.7,
+            2.9,
+            3.0,
+            3.1
+          ],
+          "biceps-braquial": [
+            2.0,
+            2.9,
+            3.6,
+            3.9,
+            3.6,
+            2.8
+          ]
+        },
+        "fuentes": [
+          "ORIENTATIVO (forma) — An KN, Hui FC, Morrey BF, Linscheid RL, Chao EY (1981): 'Muscles across the elbow joint: a biomechanical analysis', J Biomech 14(10):659-669, doi:10.1016/0021-9290(81)90048-8: picos del brazo de momento cerca de 90-100° de flexión; tabla numérica exacta pendiente de extraer del original"
+        ]
+      },
+      "calibracion": {
+        "descripcion": "constantes de escala para llevar %MVIC relativo a la pantalla; tocar aquí si el modelo se ve descompensado, NO en las fórmulas",
+        "kPec": 1.0,
+        "kDelt": 1.5,
+        "kTri": 1.0,
+        "kBi": 1.0
+      },
+      "evals": [
+        {
+          "id": "plano-pectoral-manda",
+          "tipo": "orden",
+          "setup": {
+            "inc": 0,
+            "grip": 1.0,
+            "fase": 0.1
+          },
+          "musculos": [
+            "p",
+            "d"
+          ],
+          "descripcion": "En plano, en el fondo, el pectoral domina sobre el deltoides"
+        },
+        {
+          "id": "inclinado-60-deltoides",
+          "tipo": "orden",
+          "setup": {
+            "inc": 60,
+            "grip": 1.0,
+            "fase": 0.1
+          },
+          "musculos": [
+            "d",
+            "p"
+          ],
+          "descripcion": "A 60° el deltoides anterior supera al pectoral"
+        },
+        {
+          "id": "deltoides-crece-con-incline",
+          "tipo": "tendencia",
+          "musculo": "d",
+          "dir": "sube",
+          "incs": [
+            0,
+            30,
+            60
+          ],
+          "grip": 1.0,
+          "fase": 0.1,
+          "descripcion": "El deltoides aumenta con la inclinación"
+        },
+        {
+          "id": "pectoral-decrece-con-incline",
+          "tipo": "tendencia",
+          "musculo": "p",
+          "dir": "baja",
+          "incs": [
+            0,
+            30,
+            60
+          ],
+          "grip": 1.0,
+          "fase": 0.1,
+          "descripcion": "El pectoral pierde protagonismo con la inclinación"
+        },
+        {
+          "id": "triceps-arriba-que-abajo",
+          "tipo": "compara",
+          "musculo": "t",
+          "a": {
+            "inc": 15,
+            "grip": 1.0,
+            "fase": 0.95
+          },
+          "b": {
+            "inc": 15,
+            "grip": 1.0,
+            "fase": 0.05
+          },
+          "esperado": ">",
+          "descripcion": "El tríceps trabaja más en la parte alta del recorrido"
+        },
+        {
+          "id": "biceps-frena-abajo",
+          "tipo": "compara",
+          "musculo": "b",
+          "a": {
+            "inc": 15,
+            "grip": 1.0,
+            "fase": 0.05
+          },
+          "b": {
+            "inc": 15,
+            "grip": 1.0,
+            "fase": 0.95
+          },
+          "esperado": ">",
+          "descripcion": "El bíceps frena más en el fondo que arriba (rol estabilizador)"
+        },
+        {
+          "id": "estrecho-mas-triceps",
+          "tipo": "compara",
+          "musculo": "t",
+          "a": {
+            "inc": 15,
+            "grip": 0.7,
+            "fase": 0.1
+          },
+          "b": {
+            "inc": 15,
+            "grip": 1.3,
+            "fase": 0.1
+          },
+          "esperado": ">",
+          "descripcion": "Agarre estrecho carga más tríceps"
+        },
+        {
+          "id": "ancho-mas-pectoral",
+          "tipo": "compara",
+          "musculo": "p",
+          "a": {
+            "inc": 15,
+            "grip": 1.3,
+            "fase": 0.1
+          },
+          "b": {
+            "inc": 15,
+            "grip": 0.7,
+            "fase": 0.1
+          },
+          "esperado": ">",
+          "descripcion": "Agarre ancho carga más pectoral"
+        }
+      ]
+    }
+  }
+}
