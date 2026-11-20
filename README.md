@@ -1,5 +1,10 @@
 # biomech-bench
 
+[![Deploy a GitHub Pages](https://github.com/elkangri23/biomech-bench/actions/workflows/deploy.yml/badge.svg)](https://github.com/elkangri23/biomech-bench/actions/workflows/deploy.yml)
+[![Licencia: Unlicense](https://img.shields.io/badge/licencia-Unlicense-blue.svg)](LICENSE)
+
+**Demo en vivo: <https://elkangri23.github.io/biomech-bench/>**
+
 Prototipo biomecánico interactivo del **press banca**: cómo se activan los músculos durante
 la repetición, en el navegador, con datos citados y un modelo que se audita a sí mismo.
 
