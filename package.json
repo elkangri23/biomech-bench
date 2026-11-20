@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.4.0",
   "type": "module",
+  "license": "Unlicense",
   "description": "Prototipo biomecánico interactivo del press banca: modelo de activación muscular alimentado por datos con evidencia citada y verificado por evals.",
   "scripts": {
     "dev": "vite",

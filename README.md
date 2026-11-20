@@ -120,8 +120,16 @@ pnpm preview  # sirve el build
 
 ## Licencia y créditos
 
-- Código del proyecto: por definir (MIT recomendado).
-- Datos: los estudios citados conservan sus licencias; los %MVIC se citan con la fuente
-  original y se usan con fines ilustrativos.
-- Malla `three.module.js` incluida en el repo raíz del prototipo solo como respaldo offline
-  del desarrollo anterior; el repo usa `three` de npm.
+- **Código y documentación: Unlicense (dominio público).** Cualquiera puede copiar,
+  modificar, publicar, vender o distribuir este software, con o sin atribución, para
+  cualquier propósito. Ver el archivo `LICENSE`.
+- **Datos propios del dataset (valores digitalizados y estructura): CC0 1.0** — también
+  dominio público (texto completo: creativecommons.org/publicdomain/zero/1.0/legalcode).
+- **Nota de integridad científica:** las fuentes de los estudios (Rodríguez-Ridao 2020,
+  An et al. 1981, Barnett 1995) se mantienen citadas en el dataset no por exigencia legal
+  sino por honestidad: cada número sigue llevando su estudio. El artículo original
+  (Rodríguez-Ridao 2020, MDPI) es CC-BY 4.0: los valores que de él se digitalizaron se
+  liberan aquí como datos sin derechos propios, pero la cita al original se conserva.
+- Los activos de terceros que se incorporen en el futuro (p. ej. mallas del écorché)
+  deberán ser de dominio público (CC0) o libres compatibles, y se acreditarán en
+  `CREDITS.md`.
